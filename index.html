@@ -69,7 +69,7 @@
             height: 60px;
             width: 40px;
             border-radius: 5px;
-            box-shadow: 0px 1px 8px 0px black;
+            box-shadow: 0px 0px 0px 0px black;
         }
 
         #car {
@@ -82,9 +82,9 @@
         .b_glass {
             position: absolute;
             height: 10%;
-            width: 0%;
+            width: calc(100% - 15px);
             margin-left: 20%;
-            background-color: #484848;
+            background-color: black;
         }
 
         .f_glass {
@@ -210,6 +210,7 @@
         #car_2 {
             top: -200px;
             left: 40%;
+            border-radius: 50%;
             background-color: blue;
         }
 
@@ -219,29 +220,6 @@
             background-color: blue;
         }
 
-        /*Styling the Restart feature*/
-        #restart_div {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            background-color: #292929;
-            color: white;
-            font-family: sans-serif;
-            font-size: 40px;
-            text-align: center;
-            display: none;
-        }
-
-        /*Text on the restart button*/
-        #restart {
-            border: none;
-            padding: 25px;
-            color: white;
-            background-color: #8a64ff;
-            font-size: 30px;
-            margin-top: 30%;
-        }
-
         .small_text {
             font-size: 15px;
         }
@@ -249,14 +227,37 @@
         /*Styling the score board*/
         #score_div {
             position: absolute;
-            margin-top: 20%;
-            margin-left: 10%;
-            font-size: 35px;
+            margin-top: 50vh;
+            margin-left: 2vw;
             background-color: transparent;
-            color: #454545;
-            padding: 10px;
-            box-shadow: 4px 4px 0px 1px #808080;
+            color: red;
         }
+        #score {
+            font-size: 5vh;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #333;
+            cursor: pointer;
+            width: auto;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #081872;
+            border-radius: 10px;
+            height: 0.5rem;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default look */
+            appearance: none;
+            margin-top: -4px; /* Centers thumb on the track */
+            background-color: #8a1515;
+            height: 1.5rem;
+            width: 0.5rem;    
+            border-radius: 10px;
+        }
+
 
         .return {
             position: absolute;
@@ -287,7 +288,7 @@
         .plate {
             width: 100px;
             height: 100px;
-            background-color: grey;
+            border-radius: 50%;
         }
 
         #plate_red {
@@ -297,23 +298,31 @@
             background-color: blue;
         }
 
-        .calibrate_container {
-            
+        #calibrate_container {
             position: fixed;
-            left: 0;
-            top: 0;
+            left: 2vh;
+            top: 10vh;
+        }
 
-            width: 20vw;
-            height: 40vh;
-
+        #toggle_menu_button {
+            position: fixed;
+            width: 30px; 
+            height: 30px;
+            background-size: cover;
+            border-radius: 5px;
+            background-image: url('https://i.pinimg.com/736x/ee/c0/71/eec071442e9a1b8e017c5a7c1853b880.jpg');
+            margin: 10px;
         }
     </style>
 </head>
 
 <body>
+
+    <div id="toggle_menu_button"></div>
+
     <!--Score board-->
     <div id="score_div">
-        Score: <span id="score">0</span>
+        Score <br /> <span id="score">0</span>
     </div>
     <!--One div for the rest of the elements of the game since they all will come under one area-->
     <div id="container">
@@ -351,8 +360,8 @@
             <div class="b_tyre_r"></div>
         </div>
         <div id="car_2" class="car">
-            <div class="f_glass"></div>
-            <div class="b_glass"></div>
+            <!-- <div class="f_glass"></div>
+            <div class="b_glass"></div> -->
             <div class="rev_f_light_l"></div>
             <div class="rev_f_light_r"></div>
             <div class="rev_b_light_l"></div>
@@ -374,19 +383,16 @@
             <div class="b_tyre_l"></div>
             <div class="b_tyre_r"></div>
         </div>
-        <!--div for the restart feature-->
-        <div id="restart_div">
-            <button id="restart">
-                <p>Restart</p>
-                <small class="small_text">(press Enter)</small>
-            </button>
-        </div>
     </div>
 
-    <div class="calibrate_container">
-        <div class="plate" id="plate_red"></div>
+    <div id="calibrate_container">
+        <div style="display: flex;margin-left: 50px;">
+            <div class="plate" id="plate_red"></div>
+            <div class="plate" id="plate_blue" style="margin-left: -50px;"></div>
+        </div>
+        <br />
+        <br />
         <input type="range" id="red_inp" min="0" max="255" />
-        <div class="plate" id="plate_blue"></div>
         <input type="range" id="blue_inp" min="0" max="255" />
     </div>
     
@@ -406,8 +412,6 @@
                 line_4 = $('.line_4'),
                 line_5 = $('.line_5'),
                 line_6 = $('.line_6'),
-                restart_div = $('#restart_div'),
-                restart_btn = $('#restart'),
                 score = $('#score');
             //saving some initial setup
             var container_left = parseInt(container.css('left')),
@@ -488,12 +492,18 @@
             anim_id = requestAnimationFrame(repeat);
             function repeat() {
                 if (game_over === false) {
-                    if (collision(car, car_1) || collision(car, car_2) || collision(car, car_3)) {
-                        stop_the_game();
+                    var upScore = 0;
+                    if (collision(car, car_1) || collision(car, car_3)) {
+                        upScore = -1;
+                    }
+                    else if(collision(car, car_2)) {
+                        upScore = 1;
                     }
                     score_counter++;
                     if (score_counter % 20 == 0) {
-                        score.text(parseInt(score.text()) + 1);
+                        let actualScore = parseInt(score.text());
+                        actualScore += upScore;
+                        score.text("" + (actualScore));
                     }
                     if (score_counter % 500 == 0) {
                         speed++;
@@ -525,19 +535,8 @@
                 }
                 line.css('top', line_current_top + line_speed);
             }
-            restart_btn.click(function () {
-                location.reload();
-            });
-            function stop_the_game() {
-                game_over = true;
-                cancelAnimationFrame(anim_id);
-                cancelAnimationFrame(move_right);
-                cancelAnimationFrame(move_left);
-                cancelAnimationFrame(move_up);
-                cancelAnimationFrame(move_down);
-                restart_div.slideDown();
-                restart_btn.focus();
-            }
+            
+            
             /* ------------------------------GAME CODE ENDS HERE------------------------------------------- */
             function collision($div1, $div2) {
                 var x1 = $div1.offset().left,
@@ -560,7 +559,8 @@
         function setRed(clr) {
             localStorage.setItem('RED_COL', clr);
             let col = "rgba(" + clr + ",0,0,1)";
-            $("#plate_red").css('background-color', col);
+            let colPlate = "rgba(255,0,0," + (clr/255) + ")";
+            $("#plate_red").css('background-color',  colPlate);
             $("#car_1").css('background-color', col);
             $("#car_2").css('background-color', col);
             $("#car_3").css('background-color', col);
@@ -569,7 +569,8 @@
         function setBlue(clr) {
             localStorage.setItem('BLUE_COL', clr);
             let col = "rgba(0,0," + clr + ",1)";
-            $("#plate_blue").css('background-color', col);
+            let colPlate = "rgba(0,0,255," + (clr/255) + ")";
+            $("#plate_blue").css('background-color',  colPlate);
             $("#car").css('background-color', col);            
         }
         
@@ -597,6 +598,12 @@
         else {
             redInp.value = 255;
         }
+
+        var menuButton = $("#toggle_menu_button");
+        menuButton.on('click', () => {
+            let calibrator = $("#calibrate_container");
+            calibrator.css('display', calibrator.css('display') === "block" ? 'none' : 'block');
+        })
 
 
     </script>
