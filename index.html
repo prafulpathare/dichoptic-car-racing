@@ -500,12 +500,12 @@
                         upScore = 1;
                     }
                     score_counter++;
+                    let actualScore = parseInt(score.text());
                     if (score_counter % 20 == 0) {
-                        let actualScore = parseInt(score.text());
                         actualScore += upScore;
                         score.text("" + (actualScore));
                     }
-                    if (score_counter % 500 == 0) {
+                    if (actualScore > 70 && actualScore % 200 == 0) {
                         speed++;
                         line_speed++;
                     }
